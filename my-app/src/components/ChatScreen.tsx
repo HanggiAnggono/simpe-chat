@@ -1,6 +1,6 @@
-import { Input } from "@chakra-ui/input";
-import { Box } from "@chakra-ui/layout";
+import { Box, Text } from "@chakra-ui/layout";
 import React, { useEffect, useState } from "react";
+import { useAppSelector } from "../hooks/redux";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 
@@ -45,32 +45,40 @@ export default function ChatScreen() {
   }, []);
 
   return (
-    <Box position="relative">
-      <Input
-        placeholder="Set username..."
-        onChange={(e) => setUsername(e.target.value)}
-        value={username}
-        position="absolute"
-        top="2px"
-        bg="white"
-        borderRadius="none"
-        border="unset"
-      />
-      <Box background="gray.100" p="3" py="20" height="90vh" overflowY="scroll">
+    <Box position="relative" height="100%">
+      <ChatTopbar />
+      <Box p="3" py="20">
         {messages.map((message, i) => {
-          console.log({ message });
+          const isMe = message.username === username;
+
           return (
             <Box
               key={`${i}_${message.username}`}
               display="flex"
-              justifyContent={message.username === username ? "end" : "start"}
+              justifyContent={isMe ? "end" : "start"}
             >
-              <ChatMessage message={message.message} name={message.username} />
+              <ChatMessage
+                message={message.message}
+                name={message.username}
+                style={isMe ? { bg: "blue.300", color: "white" } : undefined}
+              />
             </Box>
           );
         })}
       </Box>
       <ChatInput onSubmit={submitMessage} />
+    </Box>
+  );
+}
+
+function ChatTopbar() {
+  const chatStore = useAppSelector((state) => state.chat);
+
+  return (
+    <Box boxShadow="lg" p="10">
+      <Text as="h1" fontSize="x-large">
+        {chatStore?.roomName}
+      </Text>
     </Box>
   );
 }
