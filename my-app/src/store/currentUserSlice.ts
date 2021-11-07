@@ -1,14 +1,18 @@
 import { createSlice, PayloadAction as PA } from "@reduxjs/toolkit";
 import { User } from "randomuser";
 
-const initialState: Partial<User> = {};
+const initialState: {
+  data: Partial<User> | null;
+} = {
+  data: null,
+};
 
 const currentUserSlice = createSlice({
   name: "currentUser",
   initialState,
   reducers: {
     setCurrentUser(state, action: PA<User>) {
-      state = action.payload;
+      state.data = action.payload;
     },
   },
 });

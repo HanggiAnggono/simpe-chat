@@ -1,22 +1,23 @@
 import { Box, Image, Text } from "@chakra-ui/react";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAppDispatch } from "../hooks/redux";
 import { selectRoom } from "../store/chatSlice";
+import { Room } from "../store/roomSlice";
+import getRandomPhotoUrl from "../utils/getRandomPhoto";
 
-export default function RoomItem() {
-  const [user, setUser] = useState<any>(null);
+interface RoomItemProps {
+  room?: Room | null;
+}
+
+export default function RoomItem({ room = null }: RoomItemProps) {
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    getRandomUser().then((data) => setUser(data.data?.results?.[0]));
-  }, []);
+  console.log({ room });
 
   function handleClick() {
     dispatch(
       selectRoom({
-        roomId: user?.login?.uuid,
-        roomName: `${user?.name?.first} ${user?.name?.last}`,
+        roomId: room?.id,
+        roomName: room?.name,
       })
     );
   }
@@ -30,10 +31,10 @@ export default function RoomItem() {
       role="button"
       onClick={handleClick}
     >
-      <Image src={user?.picture?.thumbnail} borderRadius="full" height="70px" width="70px" />
+      <Image src={getRandomPhotoUrl(room?.name)} borderRadius="full" height="70px" width="70px" />
       <Box paddingLeft="4">
         <Text fontWeight="semibold" color="blue.500">
-          {user?.name?.first} {user?.name?.last}
+          {room?.name}
         </Text>
         <Box>
           <Text overflow="hidden" textOverflow="ellipsis">
@@ -43,8 +44,4 @@ export default function RoomItem() {
       </Box>
     </Box>
   );
-}
-
-function getRandomUser() {
-  return axios.get("https://randomuser.me/api/");
 }

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import WebSocket, { WebSocketServer } from "ws";
+import { User } from "./@types/randomuser";
 
 const app = express();
 
@@ -19,10 +20,16 @@ const wss = new WebSocketServer({ server });
 wss.on("connection", function connection(socket) {
   socket.on("message", function incoming(message) {
     console.log("received: %s", message);
+    let msg: any = message;
+
     wss.clients.forEach((client) => {
       if (client !== socket && client.readyState === WebSocket.OPEN) {
-        console.log(`sending ${message}`);
-        client.send(`${message}`);
+        if (msg.type === "connected") {
+          onlineUsers.concat(msg.payload);
+        }
+
+        console.log(`sending ${msg}`);
+        client.send(`${msg}`);
       }
     });
   });
@@ -34,3 +41,5 @@ wss.on("connection", function connection(socket) {
 //     wss.emit("connection", socket, request);
 //   });
 // });
+
+const onlineUsers: Array<User> = [];

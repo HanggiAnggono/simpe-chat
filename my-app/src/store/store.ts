@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import chatReducer from "./chatSlice";
 import currentUserReducer from "./currentUserSlice";
+import roomReducer from "./roomSlice";
 
 export const store = configureStore({
   reducer: {
     currentUser: currentUserReducer,
     chat: chatReducer,
+    rooms: roomReducer,
   },
 });
 

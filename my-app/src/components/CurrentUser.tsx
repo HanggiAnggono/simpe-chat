@@ -1,14 +1,10 @@
-import { Box, Text, IconButton, Image } from "@chakra-ui/react";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { Box, IconButton, Image, Text } from "@chakra-ui/react";
+import React from "react";
 import { FaEllipsisH } from "react-icons/fa";
+import { useAppSelector } from "../hooks/redux";
 
 export default function CurrentUser() {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    getRandomUser().then((data) => setUser(data.data?.results?.[0]));
-  }, []);
+  const user = useAppSelector((s) => s.currentUser.data);
 
   return (
     <Box
@@ -30,8 +26,4 @@ export default function CurrentUser() {
       <IconButton aria-label="menu" as={FaEllipsisH} color="gray.500" p="1" fontSize="sm" />
     </Box>
   );
-}
-
-function getRandomUser() {
-  return axios.get("https://randomuser.me/api/");
 }

@@ -1,12 +1,15 @@
 import { Box } from "@chakra-ui/layout";
 import React from "react";
+import { useAppSelector } from "../hooks/redux";
 import RoomItem from "./RoomItem";
 
 export default function RoomList() {
+  const rooms = useAppSelector((state) => state.rooms.data);
+
   return (
     <Box>
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => {
-        return <RoomItem key={i} />;
+      {rooms.map((room, i) => {
+        return <RoomItem key={room.id} room={room} />;
       })}
     </Box>
   );

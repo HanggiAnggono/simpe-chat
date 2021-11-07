@@ -1,20 +1,28 @@
 import { Box, Text } from "@chakra-ui/layout";
 import React, { useEffect, useState } from "react";
-import { useAppSelector } from "../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
+import { addRoom, setRooms } from "../store/roomSlice";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 
 const URL = "ws://localhost:5000";
-let ws = new WebSocket(URL);
+export let ws = new WebSocket(URL);
 
 type Message = {
   message?: string;
+  name?: string;
   username?: string;
 };
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [username, setUsername] = useState<string>(`user${Math.random().toString().substr(1, 5)}`);
+  const dispatch = useAppDispatch();
+  const [currentUser, rooms] = useAppSelector((state) => {
+    return [state.currentUser.data, state.rooms.data];
+  });
+
+  const username = currentUser?.login?.username;
+  const name = `${currentUser?.name?.first} ${currentUser?.name?.last}`;
 
   function appendMessages(message: Message) {
     setMessages((prev) => [...prev, message]);
@@ -22,27 +30,40 @@ export default function ChatScreen() {
 
   function submitMessage(messageString: string) {
     // on submitting the ChatInput form, send the message, add it to the list and reset the input
-    const message = { username, message: messageString };
+    const message = { username, name, message: messageString };
     ws.send(JSON.stringify(message));
     appendMessages(message);
   }
 
   useEffect(() => {
-    ws.onopen = () => {
-      console.log("connected");
-    };
+    ws.onopen = () => {};
 
     ws.onmessage = (evt) => {
       const message = JSON.parse(evt.data);
 
-      appendMessages(message);
-      console.log({ receivedMessage: message });
+      if (message.type === "connected") {
+        console.log(rooms);
+        dispatch(
+          addRoom({
+            name: `${message.payload.name.first} ${message.payload.name.last}`,
+            id: message.payload.id.value,
+          })
+        );
+      } else {
+        appendMessages(message);
+      }
     };
 
     ws.onclose = () => {
       ws = new WebSocket(URL);
     };
   }, []);
+
+  useEffect(() => {
+    if (ws.readyState === ws.OPEN) {
+      ws.send(JSON.stringify({ type: "connected", payload: currentUser }));
+    }
+  }, [currentUser]);
 
   return (
     <Box position="relative" height="100%">
@@ -59,7 +80,7 @@ export default function ChatScreen() {
             >
               <ChatMessage
                 message={message.message}
-                name={message.username}
+                name={message.name}
                 style={isMe ? { bg: "blue.300", color: "white" } : undefined}
               />
             </Box>

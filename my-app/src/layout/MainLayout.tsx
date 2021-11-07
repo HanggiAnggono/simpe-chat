@@ -15,7 +15,9 @@ export default function MainLayout() {
 
   useEffect(() => {
     getRandomUser().then((data) => {
-      dispatch(setCurrentUser(data.data.results[0]));
+      const currentUser: any = data.data.results[0];
+      console.log({ currentUser });
+      dispatch(setCurrentUser(currentUser));
     });
   }, [dispatch]);
 
